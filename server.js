@@ -1,7 +1,14 @@
 const express = require('express');
+const cors = require('cors');
+const path = require('path');
 const app = express();
 
+// Allow the frontend (opened from another origin, e.g. Live Server) to call this API
+app.use(cors());
 app.use(express.json());
+
+// Also serve the frontend from this server: open http://localhost:3000
+app.use(express.static(path.join(__dirname, 'frontend')));
 
 let games = require('./seed');
 let currentId = games.length + 1;
