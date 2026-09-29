@@ -1,7 +1,7 @@
-// --- CONFIGURATION ---
+
 const API_BASE_URL = 'http://localhost:3000/games';
 
-// --- DOM ELEMENTS ---
+
 const $ = (id) => document.getElementById(id);
 const gameList = $('game-list');
 const gameCount = $('game-count');
@@ -17,9 +17,7 @@ const submitBtn = $('submit-btn');
 
 let allGames = [];
 
-// --- HELPERS ---
 
-// Error that remembers the HTTP status so we can react to 400 / 404 differently
 class ApiError extends Error {
     constructor(message, status) {
         super(message);
@@ -27,7 +25,7 @@ class ApiError extends Error {
     }
 }
 
-// Wraps fetch: returns parsed JSON, or throws an ApiError with the server's message
+
 async function request(url, options) {
     let response;
     try {
@@ -42,7 +40,7 @@ async function request(url, options) {
     return data;
 }
 
-// Builds an element with textContent (safe: never parses game data as HTML)
+
 function el(tag, className, text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -50,7 +48,7 @@ function el(tag, className, text) {
     return node;
 }
 
-// No cover art in the API, so each game gets a colour based on its title
+
 function coverBackground(title) {
     let hue = 0;
     for (const ch of String(title)) hue = (hue * 31 + ch.charCodeAt(0)) % 360;
@@ -79,7 +77,7 @@ function ratingLabel(rating) {
     return 'Negative';
 }
 
-// --- STATUS (loading / error / empty) FOR THE LIST ---
+
 function showStatus(message, type) {
     statusBox.replaceChildren();
     statusBox.className = `status ${type}`;
@@ -91,9 +89,7 @@ function hideStatus() {
     statusBox.className = 'status hidden';
 }
 
-// --- API CALLS ---
 
-// 1. GET: List all games
 async function fetchGames() {
     showStatus('Loading your library...', 'loading');
     try {
@@ -107,7 +103,7 @@ async function fetchGames() {
     }
 }
 
-// 2. GET by id: Show one game in the detail view
+
 async function openDetail(id) {
     detailContent.replaceChildren(el('div', 'status loading', 'Loading game...'));
     if (!detailDialog.open) detailDialog.showModal();
@@ -120,7 +116,7 @@ async function openDetail(id) {
     }
 }
 
-// 3 & 4. POST / PUT: Save a game (PUT when the form holds an id, otherwise POST)
+
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     formError.classList.add('hidden');
@@ -144,7 +140,7 @@ form.addEventListener('submit', async (e) => {
         formDialog.close();
         fetchGames();
     } catch (err) {
-        // A 400 lands here with the API's own validation message
+        
         formError.textContent = err.message;
         formError.classList.remove('hidden');
         if (err.status === 404) fetchGames();
@@ -153,7 +149,7 @@ form.addEventListener('submit', async (e) => {
     }
 });
 
-// 5. DELETE: Remove a game
+
 async function deleteGame(game) {
     if (!confirm(`Delete "${game.title}" from your library?`)) return;
     try {
@@ -165,7 +161,7 @@ async function deleteGame(game) {
     fetchGames();
 }
 
-// --- RENDERING ---
+
 function renderList() {
     const query = searchInput.value.trim().toLowerCase();
     const visible = allGames.filter((g) =>
@@ -249,7 +245,7 @@ function renderDetail(game) {
     detailContent.replaceChildren(makeCover(game, 'detail-cover'), body);
 }
 
-// Graceful 404 (and any other failure) inside the detail dialog
+
 function renderDetailError(err) {
     const heading = el('h2', '', err.status === 404 ? 'Game not found' : 'Something went wrong');
     heading.id = 'detail-title';
@@ -265,7 +261,7 @@ function renderDetailError(err) {
     detailContent.replaceChildren(body);
 }
 
-// --- FORM (add / edit) ---
+
 function openForm(game) {
     form.reset();
     formError.classList.add('hidden');
@@ -284,12 +280,12 @@ $('add-btn').addEventListener('click', () => openForm(null));
 $('cancel-btn').addEventListener('click', () => formDialog.close());
 searchInput.addEventListener('input', renderList);
 
-// Clicking the dark backdrop closes a dialog
+
 [detailDialog, formDialog].forEach((dialog) => {
     dialog.addEventListener('click', (e) => {
         if (e.target === dialog) dialog.close();
     });
 });
 
-// Initial load
+
 fetchGames();
